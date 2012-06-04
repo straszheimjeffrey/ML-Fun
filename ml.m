@@ -6,91 +6,101 @@ BeginPackage["ML`"]
 (* These manage datasets *)
 
 
-getclass[sample[class_,vec_]]:=class
+GetClass[sample[class_,vec_]]:=class
 
 
-getvec[sample[class_,vec_]]:=vec
+GetVec[sample[class_,vec_]]:=vec
 
 
-mapvecs[f_,data_]:=
-	sample[getclass[#],f[getvec[#]]]&/@data
+MapVecs[f_,data_]:=
+	sample[GetClass[#],f[GetVec[#]]]&/@data
 
 
-allclasses[data_]:=
-	DeleteDuplicates[getclass/@data]
+AllClasses[data_]:=
+	DeleteDuplicates[GetClass/@data]
 
 
-selectclass[data_,class_]:=
-	Select[data,(getclass[#]==class)&]
+SelectClass[data_,class_]:=
+	Select[data,(GetClass[#]==class)&]
 
 
-classmatrix[data_,class_]:=
-	getvec/@selectclass[data,class]
+ClassMatrix[data_,class_]:=
+	GetVec/@SelectClass[data,class]
 
 
-fullmatrix[data_]:=getvec/@data
+FullMatrix[data_]:=GetVec/@data
 
 
-gatherdata[data_]:=
-	(c\[Function]c-> classmatrix[data,c])/@allclasses[data]
+GatherData[data_]:=
+	(c\[Function]c-> ClassMatrix[data,c])/@AllClasses[data]
 
 
-classesfromgathered[subs_]:=
+ClassesFromGathered[subs_]:=
 	(r\[Function]r[[1]])/@subs
 
 
-mapgathered[f_,subs_]:=
-(c\[Function]c->f[c/.subs])/@classesfromgathered[subs]
+MapGathered[f_,subs_]:=
+(c\[Function]c->f[c/.subs])/@ClassesFromGathered[subs]
 
 
 (* For clearing empty rows *)
 
 
-removezeros[data_]:=
+RemoveZeros[data_]:=
 	Module[{variances,d,mat},
-		variances=Variance[fullmatrix[data]];
+		variances=Variance[FullMatrix[data]];
 		d=Length[variances];
 		mat=Select[
 		(i\[Function]If[PossibleZeroQ[variances[[i]]],
 				Null,
 				PadRight[Normal[SparseArray[{i->1.0}]],d]])/@Range[d],
 		VectorQ];
-	{mapvecs[(mat.#)&,data],mat}]
+	{MapVecs[(mat.#)&,data],mat}]
 
 
 (* And LDA Package *)
 
 
-outerdifference[l_,r_]:=
+OuterDifference[l_,r_]:=
 	Module[{dif},
 	dif=l-r;
 	Outer[Times,dif,dif]]
 
 
-makeldamatrix[data_]:=
+MakeLDAMatrix[data_]:=
 	Module[{subs,means,classes,withinclass,full,fullmean,betweenclass},
-	subs=gatherdata[data];
-	means=mapgathered[Mean,subs];
-	classes=classesfromgathered[subs];
+	subs=GatherData[data];
+	means=MapGathered[Mean,subs];
+	classes=ClassesFromGathered[subs];
 	withinclass=
 		Apply[Plus,
 			(class\[Function]Apply[Plus,
-				(s\[Function]outerdifference[s,(class/.means)])/@(class/.subs)])/@classes];
-	full=fullmatrix[data];
+				(s\[Function]OuterDifference[s,(class/.means)])/@(class/.subs)])/@classes];
+	full=FullMatrix[data];
 	fullmean=Mean[full];
 	betweenclass=
-		Apply[Plus,(c\[Function]Length[c/.subs]*outerdifference[c/.means,fullmean])/@classes];
+		Apply[Plus,(c\[Function]Length[c/.subs]*OuterDifference[c/.means,fullmean])/@classes];
 	Eigensystem[PseudoInverse[withinclass].betweenclass,Length[classes]-1]]
 
 
-makelda[data_]:=
+MakeLDA[data_]:=
 	Module[{vals,matrix,convert},
-	{vals,matrix}=makeldamatrix[data];
+	{vals,matrix}=MakeLDAMatrix[data];
 	convert=s\[Function]matrix.s;
-	{mapvecs[convert,data],
+	{MapVecs[convert,data],
 	 matrix,
 	 convert,
 	 vals}]
+
+
+(* A Multivariate Normal Classifier *)
+
+
+multivarnorm[data_]:=
+	Module[{},
+	subs=gatherdata[data];
+	classes=classesfromgathered[subs];
+	]
 
 
 EndPackage[];
