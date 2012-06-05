@@ -144,4 +144,62 @@ MultiVariateNormalClassifierSingleCovariance[data_]:=
 	x\[Function]FindBest[(f\[Function]f[x])/@fns]]
 
 
+(* A Decision Tree Package *)
+
+
+BestSplit[data_]:=
+	Module[{dim,len,bestdim,bestval,bestlesseq,bestmore,bestimpurity,
+			sorted,lesseq,more,lval,rval,impurity},
+	dim=First[data]//GetVec//Length;
+	len=Length[data];
+	bestdim=Null;
+	bestval=Null;
+	bestlesseq=Null;
+	bestmore=Null;
+	bestimpurity=\[Infinity];
+	Scan[
+	Function[d,
+		sorted=Sort[data,(OrderedQ[{GetVec[#1][[d]],GetVec[#2][[d]]}])&];
+		lesseq={First[sorted]};
+		more=Rest[sorted];
+		While[Length[more]>0,
+			lval=GetVec[Last[lesseq]][[d]];
+			rval=GetVec[First[more]][[d]];
+			If[lval==rval,
+				impurity=\[Infinity],
+				impurity=N[(Length[lesseq]/len)*Entropy[2,Map[GetClass,lesseq]]
+					+(Length[more]/len)*Entropy[2,Map[GetClass,more]]]];
+			If[impurity<bestimpurity,
+				bestdim=d;
+				bestval=N[(lval+rval)/2];
+				bestlesseq=lesseq;
+				bestmore=more;
+				bestimpurity=impurity;,
+				Null]
+			AppendTo[lesseq,First[more]];
+			more=Rest[more]]],
+	Range[dim]];
+	{bestdim,bestval,bestlesseq,bestmore}]
+
+
+MakeTree[data_,maxentropy_]:=
+	Module[{classes,dim,val,lesseq,more},
+	classes=Map[GetClass,data];
+	If[Entropy[2,classes]<=maxentropy,
+		(* Low entropy, make a leaf *)
+		leaf[Tally[classes][[1,1]]],
+		(* Or else split the tree *)
+		{dim,val,lesseq,more}=BestSplit[data];
+		branch[dim,val,MakeTree[lesseq,maxentropy],MakeTree[more,maxentropy]]]]
+
+
+TreeClassify[branch[dim_,val_,leqtree_,gtree_],s_]:=
+	If[GetVec[s][[dim]]<=val,
+		TreeClassify[leqtree,s],
+		TreeClassify[gtree,s]]
+
+
+TreeClassify[leaf[class_],_]:=class
+
+
 EndPackage[];
