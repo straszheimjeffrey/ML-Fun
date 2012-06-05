@@ -48,17 +48,28 @@ MapGathered[f_,subs_]:=
 
 RemoveZeros[data_]:=
 	Module[{variances,d,mat},
-		variances=Variance[FullMatrix[data]];
-		d=Length[variances];
-		mat=Select[
-		(i\[Function]If[PossibleZeroQ[variances[[i]]],
-				Null,
-				PadRight[Normal[SparseArray[{i->1.0}]],d]])/@Range[d],
+	variances=Variance[FullMatrix[data]];
+	d=Length[variances];
+	mat=Select[
+	(i\[Function]If[PossibleZeroQ[variances[[i]]],
+			Null,
+			PadRight[Normal[SparseArray[{i->1.0}]],d]])/@Range[d],
 		VectorQ];
-	{MapVecs[(mat.#)&,data],mat}]
+	{MapVecs[v\[Function]mat.v,data],mat}]
 
 
-(* And LDA Package *)
+(* A PCA Package *)
+
+
+MakePCA[data_,n_]:=
+	Module[{vals,vecs},
+	{vals,vecs}=Eigensystem[data//FullMatrix//Covariance,n];
+	{MapVecs[x\[Function]vecs.x,data],
+	 vecs,
+	 vals}]
+
+
+(* An LDA Package *)
 
 
 OuterDifference[l_,r_]:=
