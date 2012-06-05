@@ -95,12 +95,10 @@ MakeLDAMatrix[data_]:=
 
 
 MakeLDA[data_]:=
-	Module[{vals,matrix,convert},
+	Module[{vals,matrix},
 	{vals,matrix}=MakeLDAMatrix[data];
-	convert=s\[Function]matrix.s;
-	{MapVecs[convert,data],
+	{MapVecs[x\[Function]matrix.x,data],
 	 matrix,
-	 convert,
 	 vals}]
 
 
