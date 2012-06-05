@@ -129,4 +129,19 @@ MultiVariateNormalClassifier[data_]:=
 	x\[Function]FindBest[(f\[Function]f[x])/@fns]]
 
 
+MultiVariateNormalClassifierSingleCovariance[data_]:=
+	Module[{n,cov,icov,subs,classes,pcs,ms,wvs,wss,fns},
+	n=Length[data];
+	cov=Covariance[FullMatrix[data]];
+	icov=PseudoInverse[cov];
+	subs=GatherData[data];
+	classes=ClassesFromGathered[subs];
+	pcs=MapGathered[d\[Function]Length[d]/n,subs];
+	ms=MapGathered[Mean,subs];
+	wvs=(c\[Function]c->icov.(c/.ms))/@classes;
+	wss=(c\[Function]c->-(1/2)(c/.ms).icov.(c/.ms)+Log[c/.pcs])/@classes;
+	fns=(c\[Function]x\[Function]sample[c,(c/.wvs).x+(c/.wss)])/@classes;
+	x\[Function]FindBest[(f\[Function]f[x])/@fns]]
+
+
 EndPackage[];
