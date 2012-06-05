@@ -10,17 +10,18 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     13532,        374]
-NotebookOptionsPosition[     12281,        336]
-NotebookOutlinePosition[     12941,        358]
-CellTagsIndexPosition[     12898,        355]
+NotebookDataLength[     14590,        399]
+NotebookOptionsPosition[     13332,        361]
+NotebookOutlinePosition[     13992,        383]
+CellTagsIndexPosition[     13949,        380]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 Cell[BoxData[
- RowBox[{"SetDirectory", "[", "\"\<Math/ML-Fun\>\"", "]"}]], "Input",
- CellChangeTimes->{{3.5478406849332952`*^9, 3.5478407140581713`*^9}}],
+ RowBox[{"SetDirectory", "[", "\"\<~/Math/ML-Fun\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.5478406849332952`*^9, 3.5478407140581713`*^9}, {
+  3.547852106695486*^9, 3.547852107037733*^9}}],
 
 Cell[BoxData[
  RowBox[{"<<", "ML`"}]], "Input",
@@ -192,32 +193,51 @@ Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"nozeros", ",", "zeromat"}], "}"}], "=", 
-   RowBox[{"RemoveZeros", "[", "trainingdata", "]"}]}], ";"}]], "Input",
+    RowBox[{"t", ",", 
+     RowBox[{"{", 
+      RowBox[{"nozeros", ",", "zeromat"}], "}"}]}], "}"}], "=", 
+   RowBox[{
+    RowBox[{"RemoveZeros", "[", "trainingdata", "]"}], "//", 
+    "AbsoluteTiming"}]}], ";", "t"}]], "Input",
  CellChangeTimes->{{3.547838825875153*^9, 3.547838873295889*^9}, {
   3.54784207764389*^9, 3.5478420802404547`*^9}, {3.547842285548286*^9, 
-  3.547842287497623*^9}}],
+  3.547842287497623*^9}, {3.547853047230473*^9, 3.547853051686676*^9}, {
+  3.547853354334651*^9, 3.5478533588289223`*^9}, {3.5478538633344088`*^9, 
+  3.547853863698592*^9}, {3.547854278806394*^9, 3.5478542803489943`*^9}, {
+  3.547854443617148*^9, 3.5478544524146233`*^9}}],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{
    RowBox[{"{", 
-    RowBox[{"newdata", ",", "cmat", ",", "cfun", ",", "evals"}], "}"}], "=", 
-   RowBox[{"MakeLDA", "[", "nozeros", "]"}]}], ";"}]], "Input",
+    RowBox[{"t", ",", 
+     RowBox[{"{", 
+      RowBox[{"newdata", ",", "cmat", ",", "cfun", ",", "evals"}], "}"}]}], 
+    "}"}], "=", 
+   RowBox[{
+    RowBox[{"MakeLDA", "[", "nozeros", "]"}], "//", "AbsoluteTiming"}]}], ";",
+   "t"}]], "Input",
  CellChangeTimes->{{3.547833996836062*^9, 3.547834019618787*^9}, {
    3.547834079123604*^9, 3.547834080964219*^9}, {3.54783707854889*^9, 
    3.547837087478183*^9}, {3.5478388124374228`*^9, 3.547838820609147*^9}, {
    3.5478388888585033`*^9, 3.547838889726625*^9}, {3.547839144537993*^9, 
    3.547839145758144*^9}, {3.547842086467471*^9, 3.5478420901916323`*^9}, 
-   3.547850632972143*^9}],
+   3.547850632972143*^9, {3.54785224859485*^9, 3.547852249943948*^9}, {
+   3.547852298025709*^9, 3.547852308367865*^9}, {3.5478523525136557`*^9, 
+   3.547852368133498*^9}}],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"norm", "=", 
-   RowBox[{"MultiVariateNormClassifier", "[", "newdata", "]"}]}], 
-  ";"}]], "Input",
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"t", ",", "normal"}], "}"}], "=", 
+   RowBox[{
+    RowBox[{"MultiVariateNormalClassifier", "[", "newdata", "]"}], "//", 
+    "AbsoluteTiming"}]}], ";", "t"}]], "Input",
  CellChangeTimes->{{3.5478441203697557`*^9, 3.547844136358136*^9}, {
-   3.5478443008510647`*^9, 3.547844301656519*^9}, 3.547851708836231*^9}],
+   3.5478443008510647`*^9, 3.547844301656519*^9}, 3.547851708836231*^9, {
+   3.547851992501717*^9, 3.547851995402804*^9}, {3.5478546927533693`*^9, 
+   3.547854701719612*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -229,18 +249,23 @@ Cell[BoxData[
      RowBox[{"converted", ":=", 
       RowBox[{"cfun", "[", 
        RowBox[{"zeromat", ".", "i"}], "]"}]}], ";", "\[IndentingNewLine]", 
-     RowBox[{"norm", "[", "converted", "]"}]}]}], "]"}]}]], "Input",
+     RowBox[{"normal", "[", "converted", "]"}]}]}], "]"}]}]], "Input",
  CellChangeTimes->{{3.5478447564816513`*^9, 3.547844814938398*^9}, {
-  3.5478515170510674`*^9, 3.54785151838011*^9}}],
+  3.5478515170510674`*^9, 3.54785151838011*^9}, {3.547853467633008*^9, 
+  3.5478534677767076`*^9}}],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"results", "=", 
-   RowBox[{"MapVecs", "[", 
-    RowBox[{"normguess", ",", "validationdata"}], "]"}]}], ";"}]], "Input",
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"t", ",", "results"}], "}"}], "=", 
+   RowBox[{
+    RowBox[{"MapVecs", "[", 
+     RowBox[{"normguess", ",", "validationdata"}], "]"}], "//", 
+    "AbsoluteTiming"}]}], ";", "t"}]], "Input",
  CellChangeTimes->{{3.547844822250861*^9, 3.547844837017276*^9}, {
   3.547845562690538*^9, 3.547845564427267*^9}, {3.547850653503159*^9, 
-  3.547850670235992*^9}}],
+  3.547850670235992*^9}, {3.547852778817224*^9, 3.547852789046741*^9}}],
 
 Cell[BoxData[
  RowBox[{"errorcount", "=", 
@@ -357,25 +382,25 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[557, 20, 153, 2, 27, "Input"],
-Cell[713, 24, 113, 2, 27, "Input"],
-Cell[829, 28, 3076, 69, 193, "Input"],
-Cell[3908, 99, 815, 20, 27, "Input"],
-Cell[4726, 121, 672, 18, 27, "Input"],
-Cell[5401, 141, 469, 13, 27, "Input"],
-Cell[5873, 156, 525, 15, 27, "Input"],
-Cell[6401, 173, 524, 15, 27, "Input"],
-Cell[6928, 190, 343, 8, 27, "Input"],
-Cell[7274, 200, 582, 11, 27, "Input"],
-Cell[7859, 213, 275, 6, 27, "Input"],
-Cell[8137, 221, 535, 12, 73, "Input"],
-Cell[8675, 235, 318, 7, 27, "Input"],
-Cell[8996, 244, 581, 16, 27, "Input"],
-Cell[9580, 262, 254, 5, 27, "Input"],
-Cell[9837, 269, 166, 3, 27, "Input"],
-Cell[10006, 274, 304, 9, 27, "Input"],
-Cell[10313, 285, 1768, 43, 88, "Input"],
-Cell[12084, 330, 193, 4, 27, "Input"]
+Cell[557, 20, 204, 3, 27, "Input"],
+Cell[764, 25, 113, 2, 27, "Input"],
+Cell[880, 29, 3076, 69, 193, "Input"],
+Cell[3959, 100, 815, 20, 27, "Input"],
+Cell[4777, 122, 672, 18, 27, "Input"],
+Cell[5452, 142, 469, 13, 27, "Input"],
+Cell[5924, 157, 525, 15, 27, "Input"],
+Cell[6452, 174, 524, 15, 27, "Input"],
+Cell[6979, 191, 692, 15, 27, "Input"],
+Cell[7674, 208, 834, 18, 27, "Input"],
+Cell[8511, 228, 476, 11, 27, "Input"],
+Cell[8990, 241, 588, 13, 73, "Input"],
+Cell[9581, 256, 463, 11, 27, "Input"],
+Cell[10047, 269, 581, 16, 27, "Input"],
+Cell[10631, 287, 254, 5, 27, "Input"],
+Cell[10888, 294, 166, 3, 27, "Input"],
+Cell[11057, 299, 304, 9, 27, "Input"],
+Cell[11364, 310, 1768, 43, 88, "Input"],
+Cell[13135, 355, 193, 4, 27, "Input"]
 }
 ]
 *)

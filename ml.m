@@ -74,8 +74,8 @@ MakeLDAMatrix[data_]:=
 	classes=ClassesFromGathered[subs];
 	withinclass=
 		Apply[Plus,
-			(class\[Function]Apply[Plus,
-				(s\[Function]OuterDifference[s,(class/.means)])/@(class/.subs)])/@classes];
+			(class\[Function]Apply[Plus,(s\[Function]OuterDifference[s,(class/.means)])/@(class/.subs)])
+			/@classes];
 	full=FullMatrix[data];
 	fullmean=Mean[full];
 	betweenclass=
@@ -103,7 +103,7 @@ FindBest[data_]:=
 	best]
 
 
-MultiVariateNormClassifier[data_]:=
+MultiVariateNormalClassifier[data_]:=
 	Module[{n,subs,classes,pcs,ms,ss,ssi,dss,wms,wvs,wss,fns},
 	n=Length[data];
 	subs=GatherData[data];
