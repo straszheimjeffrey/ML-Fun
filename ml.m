@@ -96,6 +96,13 @@ MakeLDA[data_]:=
 (* A Multivariate Normal Classifier *)
 
 
+FindBest[data_]:=
+	Module[{best=Null,bestval=-\[Infinity]},
+	Scan[v\[Function]If[GetVec[v]>bestval,best=GetClass[v];bestval=GetVec[v],Null],
+		data];
+	best]
+
+
 MultiVariateNormClassifier[data_]:=
 	Module[{n,subs,classes,pcs,ms,ss,ssi,dss,wms,wvs,wss,fns},
 	n=Length[data];
@@ -109,14 +116,8 @@ MultiVariateNormClassifier[data_]:=
 	wms=(c\[Function]c->-(1/2)(c/.ssi))/@classes;
 	wvs=(c\[Function]c->(c/.ssi).(c/.ms))/@classes;
 	wss=(c\[Function]c->-(1/2)((c/.ms).(c/.ssi).(c/.ms))-(1/2)Log[c/.dss]+Log[c/.pcs])/@classes;
-	fns=(c\[Function]x\[Function]{c,x.(c/.wms).x+(c/.wvs).x+(c/.wss)})/@classes;
-	x\[Function]Module[{results,best,bestval},
-		results=(f\[Function]f[x])/@fns;
-		best=Null;
-		bestval=-\[Infinity];
-		Scan[v\[Function]If[v[[2]]>bestval,best=v[[1]];bestval=v[[2]],Null],
-			results];
-		best]]
+	fns=(c\[Function]x\[Function]sample[c,x.(c/.wms).x+(c/.wvs).x+(c/.wss)])/@classes;
+	x\[Function]FindBest[(f\[Function]f[x])/@fns]]
 
 
 EndPackage[];
