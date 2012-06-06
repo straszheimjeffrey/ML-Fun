@@ -183,44 +183,30 @@ BestOfDimension[data_,dim_]:=
 			bestmore=more;
 			bestimpurity=impurity,
 			Null]];
-	{bestval,bestless,bestmore,bestimpurity}]
+	{dim,bestval,bestless,bestmore,bestimpurity}]
 
 
 BestSplit[data_]:=
-	Module[{bestdim,bestval,bestless,bestmore,bestimpurity,
-			less,more,val,impurity},
-	bestdim=Null;
-	bestval=Null;
-	bestless=Null;
-	bestmore=Null;
-	bestimpurity=\[Infinity];
-	Scan[
-	Function[dim,
-		(*Print[{d,dim}];*)
-		{val,less,more,impurity}=BestOfDimension[data,dim];
-		If[impurity<bestimpurity,
-			bestdim=dim;
-			bestval=val;
-			bestless=less;
-			bestmore=more;
-			bestimpurity=impurity,
-			Null]],
-	Range[First[data]//GetVec//Length]];
-	{bestdim,bestval,bestless,bestmore}]
+	Fold[{next,best}\[Function]If[next[[5]]<best[[5]],next,best],
+		{Null,Null,Null,Null,\[Infinity]},
+		ParallelMap[d\[Function]BestOfDimension[data,d],
+					Range[First[data]//GetVec//Length]]]
 
 
 MakeTree[data_,maxentropy_]:=
-	Module[{classes,dim,val,less,more},
+	Module[{classes,dim,val,less,more,impurity},
 	(*Print[{"Branch", Length[data]}];*)
 	classes=Map[GetClass,data];
 	If[Entropy[2,classes]<=maxentropy,
 		(* Low entropy, make a leaf *)
-		Print[classes];
 		leaf[Tally[classes][[1,1]]],
 		(* Or else split the tree *)
-		{dim,val,less,more}=BestSplit[data];
+		{dim,val,less,more,impurity}=BestSplit[data];
 		(*Print[{"Best",Length[less],Length[more]}];*)
 		branch[dim,val,MakeTree[less,maxentropy],MakeTree[more,maxentropy]]]]
+
+
+DistributeDefinitions[MakeTree];
 
 
 TreeClassify[branch[dim_,val_,leqtree_,gtree_],x_]:=
