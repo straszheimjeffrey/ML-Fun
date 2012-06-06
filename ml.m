@@ -147,16 +147,6 @@ MultiVariateNormalClassifierSingleCovariance[data_]:=
 (* A Decision Tree Package *)
 
 
-ComputeImpurity[dim_,less_,more_]:=
-	Module[{len,lval,rval,impurity},
-	len=Length[less]+Length[more];
-	lval=GetVec[Last[less]][[dim]];
-	rval=GetVec[First[more]][[dim]];
-	If[lval==rval,
-		\[Infinity],
-		N[(Length[less]/len)*Entropy[2,Map[GetClass,less]]
-			+(Length[more]/len)*Entropy[2,Map[GetClass,more]]]]]
-
 RunningEntropy[countsa_]:=
 	Module[{counts,total},
 	counts=Select[Map[x\[Function]x[[2]],ArrayRules[countsa]],Positive];
@@ -194,43 +184,6 @@ BestOfDimension[data_,dim_]:=
 			bestimpurity=impurity,
 			Null]];
 	{bestval,bestless,bestmore,bestimpurity}]
-
-BestOfDimensionq[data_,dim_]:=
-	BestOfDimension[data,1,Length[data],dim]
-
-BestOfDimension[data_,start_,end_,dim_]:=
-	Module[{bestval,bestless,bestmore,bestimpurity,
-			sorted,offset,sentinel,
-			less,more,impurity},
-	(*Print[{q,Length[data],start,end}];*)
-	bestval=Null;
-	bestless=Null;
-	bestmore=Null;
-	bestimpurity=\[Infinity];
-	sorted=Sort[data,(OrderedQ[{GetVec[#1][[dim]],GetVec[#2][[dim]]}])&];
-	offset=Quotient[end-start-1,20]+1;
-	less=sorted[[;;start]];
-	more=sorted[[start+1;;]];
-	sentinel=(Length[data]-end)+offset;
-	While[Length[more]>=sentinel,
-		impurity=ComputeImpurity[dim,less,more];
-		If[impurity<bestimpurity,
-			bestval=N[(GetVec[Last[less]][[dim]]+GetVec[First[more]][[dim]])/2];
-			bestless=less;
-			bestmore=more;
-			bestimpurity=impurity,
-			Null];
-		less=Join[less,Take[more,offset]];
-		more=Drop[more,offset]];
-	If[Length[bestless]==0,
-		{Null,Null,Null,\[Infinity]},
-		If[offset==1,
-			{bestval,bestless,bestmore,bestimpurity},
-			With[{center=Length[bestless],radius=Quotient[offset,2]},
-				BestOfDimension[data,
-								Max[center-offset,start],
-								Min[center+offset,end],
-								dim]]]]]
 
 
 BestSplit[data_]:=
