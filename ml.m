@@ -157,8 +157,45 @@ ComputeImpurity[dim_,less_,more_]:=
 		N[(Length[less]/len)*Entropy[2,Map[GetClass,less]]
 			+(Length[more]/len)*Entropy[2,Map[GetClass,more]]]]]
 
+RunningEntropy[countsa_]:=
+	Module[{counts,total},
+	counts=Select[Map[x\[Function]x[[2]],ArrayRules[countsa]],Positive];
+	total=Apply[Plus,counts];
+	Apply[Plus,Map[x\[Function]N[-(x/total)*Log2[x/total]],counts]]]
+
 
 BestOfDimension[data_,dim_]:=
+	Module[{bestval,bestless,bestmore,bestimpurity,
+			less,more,gathered,classes,countsr,countsl,num,
+			shifter,impurity},
+	bestval=Null;
+	bestless=Null;
+	bestmore=Null;
+	bestimpurity=\[Infinity];
+	less={};
+	more=Sort[data,(OrderedQ[{GetVec[#1][[dim]],GetVec[#2][[dim]]}])&];
+	gathered=MapGathered[Length,GatherData[more]];
+	classes=ClassesFromGathered[gathered];
+	countsr=SparseArray[gathered];
+	countsl=SparseArray[(c\[Function]c->0)/@classes];
+	num=Length[more];
+	While[Length[more]>1,
+		shifter=First[more];
+		more=Drop[more,1];
+		AppendTo[less,shifter];
+		countsr[[GetClass[shifter]]]-=1;
+		countsl[[GetClass[shifter]]]+=1;
+		impurity=(Length[less]/num)*RunningEntropy[countsl]
+				+(Length[more]/num)*RunningEntropy[countsr];
+		If[impurity<bestimpurity,
+			bestval=N[(GetVec[Last[less]][[dim]]+GetVec[First[more]][[dim]])/2];
+			bestless=less;
+			bestmore=more;
+			bestimpurity=impurity,
+			Null]];
+	{bestval,bestless,bestmore,bestimpurity}]
+
+BestOfDimensionq[data_,dim_]:=
 	BestOfDimension[data,1,Length[data],dim]
 
 BestOfDimension[data_,start_,end_,dim_]:=
@@ -191,8 +228,8 @@ BestOfDimension[data_,start_,end_,dim_]:=
 			{bestval,bestless,bestmore,bestimpurity},
 			With[{center=Length[bestless],radius=Quotient[offset,2]},
 				BestOfDimension[data,
-								Max[center-radius,start],
-								Min[center+radius,end],
+								Max[center-offset,start],
+								Min[center+offset,end],
 								dim]]]]]
 
 
@@ -225,21 +262,18 @@ MakeTree[data_,maxentropy_]:=
 	classes=Map[GetClass,data];
 	If[Entropy[2,classes]<=maxentropy,
 		(* Low entropy, make a leaf *)
+		Print[classes];
 		leaf[Tally[classes][[1,1]]],
 		(* Or else split the tree *)
 		{dim,val,less,more}=BestSplit[data];
 		(*Print[{"Best",Length[less],Length[more]}];*)
-		If[dim===Null,
-			leaf[Tally[classes][[1,1]]],
-			branch[dim,val,MakeTree[less,maxentropy],MakeTree[more,maxentropy]]]]]
+		branch[dim,val,MakeTree[less,maxentropy],MakeTree[more,maxentropy]]]]
 
 
 TreeClassify[branch[dim_,val_,leqtree_,gtree_],x_]:=
-	Module[{},
-	Print[x];
 	If[x[[dim]]<=val,
 		TreeClassify[leqtree,x],
-		TreeClassify[gtree,x]]]
+		TreeClassify[gtree,x]]
 
 
 TreeClassify[leaf[class_],_]:=class
