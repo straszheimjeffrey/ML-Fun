@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[      7137,        236]
-NotebookOptionsPosition[      6098,        201]
-NotebookOutlinePosition[      6452,        217]
-CellTagsIndexPosition[      6409,        214]
+NotebookDataLength[      7731,        247]
+NotebookOptionsPosition[      6690,        212]
+NotebookOutlinePosition[      7044,        228]
+CellTagsIndexPosition[      7001,        225]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -33,74 +33,86 @@ Cell[BoxData[
      RowBox[{"CauchyDistribution", "[", 
       RowBox[{"0", ",", "1"}], "]"}], "]"}], ",", 
     RowBox[{"{", "r", "}"}], ",", 
-    RowBox[{"{", "6", "}"}]}], "]"}]}]], "Input"],
+    RowBox[{"{", "20", "}"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.548062158963716*^9, 3.548062159786996*^9}}],
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"makesample", "[", "mat_", "]"}], ":=", "\[IndentingNewLine]", 
+  RowBox[{"makesample", "[", 
+   RowBox[{"mat_", ",", "nc_"}], "]"}], ":=", "\[IndentingNewLine]", 
   RowBox[{"With", "[", 
    RowBox[{
     RowBox[{"{", 
      RowBox[{
-      RowBox[{"factor1", " ", "=", 
-       RowBox[{"RandomVariate", "[", 
-        RowBox[{"BinomialDistribution", "[", 
-         RowBox[{"3", ",", ".5"}], "]"}], "]"}]}], ",", "\[IndentingNewLine]", 
-      RowBox[{"factor2", "=", 
+      RowBox[{"cl", "=", 
        RowBox[{"RandomVariate", "[", 
         RowBox[{"DiscreteUniformDistribution", "[", 
          RowBox[{"{", 
-          RowBox[{"0", ",", "2"}], "}"}], "]"}], "]"}]}], ",", 
+          RowBox[{"1", ",", "nc"}], "}"}], "]"}], "]"}]}], ",", 
+      "\[IndentingNewLine]", 
+      RowBox[{"factor2", "=", 
+       RowBox[{"RandomVariate", "[", 
+        RowBox[{"NormalDistribution", "[", "]"}], "]"}]}], ",", 
       "\[IndentingNewLine]", 
       RowBox[{"factor3", "=", 
        RowBox[{"RandomVariate", "[", 
-        RowBox[{"DiscreteUniformDistribution", "[", 
-         RowBox[{"{", 
-          RowBox[{"1", ",", "8"}], "}"}], "]"}], "]"}]}]}], "}"}], ",", 
-    "\[IndentingNewLine]", 
-    RowBox[{"sample", "[", 
-     RowBox[{
-      RowBox[{"factor1", "+", "factor2", "+", "factor3"}], ",", 
+        RowBox[{"NormalDistribution", "[", 
+         RowBox[{"3", ",", "3"}], "]"}], "]"}]}], ",", "\[IndentingNewLine]", 
+      
+      RowBox[{"factor4", "=", 
+       RowBox[{"RandomVariate", "[", 
+        RowBox[{"StudentTDistribution", "[", 
+         RowBox[{"0", ",", "1", ",", "2"}], "]"}], "]"}]}], ",", 
       "\[IndentingNewLine]", 
+      RowBox[{"fl", "=", 
+       RowBox[{"x", "\[Function]", 
+        RowBox[{"Join", "[", 
+         RowBox[{"x", ",", 
+          RowBox[{"Flatten", "[", 
+           RowBox[{"Outer", "[", 
+            RowBox[{"Times", ",", "x", ",", "x"}], "]"}], "]"}]}], 
+         "]"}]}]}]}], "}"}], ",", "\[IndentingNewLine]", 
+    RowBox[{"sample", "[", 
+     RowBox[{"cl", ",", 
       RowBox[{"mat", ".", 
-       RowBox[{"{", 
-        RowBox[{
-        "factor1", ",", "factor2", ",", "factor3", ",", "\[IndentingNewLine]", 
-         RowBox[{"RandomVariate", "[", 
-          RowBox[{"NormalDistribution", "[", "]"}], "]"}], ",", 
-         "\[IndentingNewLine]", 
-         RowBox[{"RandomVariate", "[", 
-          RowBox[{"NormalDistribution", "[", 
-           RowBox[{"0", ",", "5"}], "]"}], "]"}], ",", "\[IndentingNewLine]", 
-         
-         RowBox[{"RandomVariate", "[", 
-          RowBox[{"StudentTDistribution", "[", 
-           RowBox[{"0", ",", "1", ",", "2"}], "]"}], "]"}]}], "}"}]}]}], 
-     "]"}]}], "]"}]}]], "Input"],
+       RowBox[{"fl", "[", 
+        RowBox[{"{", 
+         RowBox[{"cl", ",", "factor2", ",", "factor3", ",", "factor4"}], 
+         "}"}], "]"}]}]}], "]"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.548061730629533*^9, 3.5480618694696207`*^9}, {
+   3.5480620186068087`*^9, 3.5480621423185253`*^9}, {3.548062347471837*^9, 
+   3.5480623715840273`*^9}, 3.54806240619558*^9, {3.5480624779898567`*^9, 
+   3.548062478546102*^9}, {3.548062508595479*^9, 3.5480625567522097`*^9}, {
+   3.548062604466333*^9, 3.5480626333127203`*^9}}],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"testnoise", "=", 
-   RowBox[{"noisematrix", "[", "15", "]"}]}], ";", 
-  RowBox[{"testnoise", "//", "MatrixForm"}]}]], "Input"],
+   RowBox[{"noisematrix", "[", "25", "]"}]}], ";", 
+  RowBox[{"testnoise", "//", "MatrixForm"}]}]], "Input",
+ CellChangeTimes->{{3.5480628257266693`*^9, 3.548062825917759*^9}}],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"testdata", "=", 
    RowBox[{"Table", "[", 
     RowBox[{
-     RowBox[{"makesample", "[", "testnoise", "]"}], ",", 
+     RowBox[{"makesample", "[", 
+      RowBox[{"testnoise", ",", "8"}], "]"}], ",", 
      RowBox[{"{", "1000", "}"}]}], "]"}]}], ";"}]], "Input",
- CellChangeTimes->{{3.5480247774374866`*^9, 3.548024779163631*^9}}],
+ CellChangeTimes->{{3.5480247774374866`*^9, 3.548024779163631*^9}, {
+  3.548062204472725*^9, 3.548062205608244*^9}}],
 
 Cell[BoxData[
  RowBox[{
   RowBox[{"validationdata", "=", 
    RowBox[{"Table", "[", 
     RowBox[{
-     RowBox[{"makesample", "[", "testnoise", "]"}], ",", 
+     RowBox[{"makesample", "[", 
+      RowBox[{"testnoise", ",", "8"}], "]"}], ",", 
      RowBox[{"{", "500", "}"}]}], "]"}]}], ";"}]], "Input",
- CellChangeTimes->{{3.548024781352173*^9, 3.548024795717042*^9}}],
+ CellChangeTimes->{{3.548024781352173*^9, 3.548024795717042*^9}, {
+  3.548062444041562*^9, 3.5480624444189987`*^9}}],
 
 Cell[BoxData[
  RowBox[{
@@ -108,14 +120,12 @@ Cell[BoxData[
    RowBox[{"testdata", ",", "10"}], "]"}], "//", "TableForm"}]], "Input"],
 
 Cell[BoxData[
- RowBox[{"TallyClasses", "[", "testdata", "]"}]], "Input"],
+ RowBox[{"Sort", "[", 
+  RowBox[{"AllClasses", "[", "testdata", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.548062701256214*^9, 3.548062725033523*^9}}],
 
 Cell[BoxData[
- RowBox[{"Length", "/@", 
-  RowBox[{"FullMatrix", "/@", 
-   RowBox[{"GatherData", "[", 
-    RowBox[{"Take", "[", 
-     RowBox[{"testdata", ",", "15"}], "]"}], "]"}]}]}]], "Input"],
+ RowBox[{"TallyClasses", "[", "testdata", "]"}]], "Input"],
 
 Cell[BoxData[
  RowBox[{"ClassesFromGathered", "[", 
@@ -161,9 +171,10 @@ Cell[BoxData[
    RowBox[{"{", 
     RowBox[{"mat", ",", "vals"}], "}"}], "=", 
    RowBox[{"MakeLDA", "[", 
-    RowBox[{"adjusteddata", ",", "6"}], "]"}]}], ";"}]], "Input",
+    RowBox[{"adjusteddata", ",", "7"}], "]"}]}], ";"}]], "Input",
  CellChangeTimes->{{3.5480253189744177`*^9, 3.548025319219227*^9}, {
-  3.548026148071823*^9, 3.5480261486537*^9}}],
+  3.548026148071823*^9, 3.5480261486537*^9}, {3.548062864208379*^9, 
+  3.548062864718227*^9}}],
 
 Cell[BoxData[
  RowBox[{"mat", "//", "MatrixForm"}]], "Input"],
@@ -218,26 +229,26 @@ CellTagsIndex->{}
 Notebook[{
 Cell[557, 20, 85, 1, 27, "Input"],
 Cell[645, 23, 47, 1, 27, "Input"],
-Cell[695, 26, 322, 9, 27, "Input"],
-Cell[1020, 37, 1640, 41, 148, "Input"],
-Cell[2663, 80, 161, 4, 27, "Input"],
-Cell[2827, 86, 277, 7, 27, "Input"],
-Cell[3107, 95, 280, 7, 27, "Input"],
-Cell[3390, 104, 121, 3, 27, "Input"],
-Cell[3514, 109, 72, 1, 27, "Input"],
-Cell[3589, 112, 193, 5, 27, "Input"],
-Cell[3785, 119, 116, 2, 27, "Input"],
-Cell[3904, 123, 428, 14, 27, "Input"],
-Cell[4335, 139, 117, 3, 27, "Input"],
-Cell[4455, 144, 171, 5, 27, "Input"],
-Cell[4629, 151, 153, 4, 27, "Input"],
-Cell[4785, 157, 307, 8, 27, "Input"],
-Cell[5095, 167, 61, 1, 27, "Input"],
-Cell[5159, 170, 30, 0, 27, "Input"],
-Cell[5192, 172, 311, 9, 27, "Input"],
-Cell[5506, 183, 205, 5, 27, "Input"],
-Cell[5714, 190, 244, 5, 27, "Input"],
-Cell[5961, 197, 133, 2, 27, "Input"]
+Cell[695, 26, 389, 10, 27, "Input"],
+Cell[1087, 38, 1920, 47, 118, "Input"],
+Cell[3010, 87, 229, 5, 27, "Input"],
+Cell[3242, 94, 353, 9, 27, "Input"],
+Cell[3598, 105, 358, 9, 27, "Input"],
+Cell[3959, 116, 121, 3, 27, "Input"],
+Cell[4083, 121, 167, 3, 27, "Input"],
+Cell[4253, 126, 72, 1, 27, "Input"],
+Cell[4328, 129, 116, 2, 27, "Input"],
+Cell[4447, 133, 428, 14, 27, "Input"],
+Cell[4878, 149, 117, 3, 27, "Input"],
+Cell[4998, 154, 171, 5, 27, "Input"],
+Cell[5172, 161, 153, 4, 27, "Input"],
+Cell[5328, 167, 356, 9, 27, "Input"],
+Cell[5687, 178, 61, 1, 27, "Input"],
+Cell[5751, 181, 30, 0, 27, "Input"],
+Cell[5784, 183, 311, 9, 27, "Input"],
+Cell[6098, 194, 205, 5, 27, "Input"],
+Cell[6306, 201, 244, 5, 27, "Input"],
+Cell[6553, 208, 133, 2, 27, "Input"]
 }
 ]
 *)

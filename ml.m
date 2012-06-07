@@ -94,11 +94,9 @@ MakeLDAMatrix[data_,n_]:=
 	classdata=FullMatrix/@GatherData[data];
 	classcounts=Length/@classdata;
 	classmeans=Mean/@classdata;
-	Print["Within"];
 	withinclass=Plus@@MapThread[Scatter,{classdata,classmeans}];
 	full=FullMatrix[data];
 	fullmean=Mean[full];
-	Print["Between"];
 	betweenclass=Plus@@MapThread[{cm,cc}\[Function]cc*OuterDifference[cm,fullmean],
 					{classmeans,classcounts}];
 	Eigensystem[PseudoInverse[withinclass].betweenclass,n]]
