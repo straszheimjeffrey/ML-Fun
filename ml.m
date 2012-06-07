@@ -157,13 +157,8 @@ RunningEntropy[countswithzeros_]:=
 
 
 BestOfDimension[data_,dim_]:=
-	Module[{bestval,bestless,bestmore,bestimpurity,
-			less,more,countsr,countsl,num,
-			shifter,impurity},
-	bestval=Null;
-	bestless=Null;
-	bestmore=Null;
-	bestimpurity=\[Infinity];
+	Module[{best,less,more,countsr,countsl,num,shifter,lentropy,rentropy,impurity},
+	best={dim,Null,\[Infinity],Null,\[Infinity],\[Infinity]};
 	less={};
 	more=Sort[data,(OrderedQ[{GetVec[#1][[dim]],GetVec[#2][[dim]]}])&];
 	countsr=TallyClasses[more];
@@ -175,35 +170,42 @@ BestOfDimension[data_,dim_]:=
 		AppendTo[less,shifter];
 		countsr[[GetClass[shifter]]]-=1;
 		countsl[[GetClass[shifter]]]+=1;
-		impurity=(Length[less]/num)*RunningEntropy[countsl]
-				+(Length[more]/num)*RunningEntropy[countsr];
-		If[impurity<bestimpurity,
-			bestval=N[(GetVec[Last[less]][[dim]]+GetVec[First[more]][[dim]])/2];
-			bestless=less;
-			bestmore=more;
-			bestimpurity=impurity,
-			Null]];
-	{dim,bestval,bestless,bestmore,bestimpurity}]
+		If[GetVec[shifter][[dim]]==GetVec[First[more]][[dim]]
+				\[Or] GetClass[shifter]==GetClass[First[more]],
+			Null,
+			lentropy=RunningEntropy[countsl];
+			rentropy=RunningEntropy[countsr];
+			impurity=(Length[less]/num)*lentropy+(Length[more]/num)*rentropy;
+			If[impurity<best[[6]],
+				best={dim,less,lentropy,more,rentropy,impurity},
+				Null]]];
+	best]
 
 
 BestSplit[data_]:=
-	Fold[{next,best}\[Function]If[next[[5]]<best[[5]],next,best],
-		{Null,Null,Null,Null,\[Infinity]},
+	Fold[{next,best}\[Function]If[next[[6]]<best[[6]],next,best],
+		{Null,Null,\[Infinity],Null,\[Infinity],\[Infinity]},
 		ParallelMap[d\[Function]BestOfDimension[data,d],
 					Range[First[data]//GetVec//Length]]]
 
 
+LeafOrBranch[data_,entropy_,maxentropy_]:=
+	If[entropy<=maxentropy,
+		leaf[Ordering[TallyClasses[data],-1][[1]]],
+		MakeTree[data,maxentropy]]
+
 MakeTree[data_,maxentropy_]:=
-	Module[{classes,dim,val,less,more,impurity},
-	(*Print[{"Branch", Length[data]}];*)
-	classes=Map[GetClass,data];
-	If[Entropy[2,classes]<=maxentropy,
-		(* Low entropy, make a leaf *)
-		leaf[Tally[classes][[1,1]]],
-		(* Or else split the tree *)
-		{dim,val,less,more,impurity}=BestSplit[data];
-		(*Print[{"Best",Length[less],Length[more]}];*)
-		branch[dim,val,MakeTree[less,maxentropy],MakeTree[more,maxentropy]]]]
+	Module[{dim,less,lentropy,more,mentropy,impurity,
+			lbranch,rbranch,val},
+	{dim,less,lentropy,more,mentropy,impurity}=BestSplit[data];
+	If[dim===Null,
+		(* No split, we're a leaf *)
+		leaf[Ordering[TallyClasses[data],-1][[1]]],
+		(* Split Here *)
+		lbranch=LeafOrBranch[less,lentropy,maxentropy];
+		rbranch=LeafOrBranch[more,mentropy,maxentropy];
+		val=(GetVec[less[[-1]]][[dim]] + GetVec[more[[1]]][[dim]]) / 2.0;
+		branch[dim,val,lbranch,rbranch]]]
 
 
 DistributeDefinitions[MakeTree];
