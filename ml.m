@@ -29,7 +29,7 @@ AllClasses[data_]:=
 
 
 SelectClass[data_,class_]:=
-	Select[data,s\[Function]GetClass[c]==class]
+	Select[data,s\[Function]GetClass[s]==class]
 
 
 TallyClasses[data_]:=
@@ -57,15 +57,15 @@ ClassesFromGathered[gdata_]:=
 
 
 RemoveZeros[data_]:=
-	Module[{variances,d,mat},
+	Module[{variances,d},
 	variances=Variance[FullMatrix[data]];
 	d=Length[variances];
-	mat=Select[
-	(i\[Function]If[PossibleZeroQ[variances[[i]]],
-			Null,
-			PadRight[Normal[SparseArray[{i->1.0}]],d]])/@Range[d],
-		VectorQ];
-	{MapVecs[v\[Function]mat.v,data],mat}]
+	Select[
+		(i\[Function]If[PossibleZeroQ[variances[[i]]],
+				Null,
+				PadRight[Normal[SparseArray[{i->1.0}]],d]])/@Range[d],
+		VectorQ]]
+	
 
 
 (* A PCA Package *)
@@ -114,28 +114,22 @@ MakeLDA[data_,n_]:=
 (* A Multivariate Normal Classifier *)
 
 
-FindBest[data_]:=
-	Module[{best=Null,bestval=-\[Infinity]},
-	Scan[v\[Function]If[GetVec[v]>bestval,best=GetClass[v];bestval=GetVec[v],Null],
-		data];
-	best]
-
-
 MultiVariateNormalClassifier[data_]:=
-	Module[{n,subs,classes,pcs,ms,ss,ssi,dss,wms,wvs,wss,fns},
+	Module[{n,gathered,classes,classdata,pcs,ms,ss,ssi,dss,wms,wvs,wss,fns},
 	n=Length[data];
-	subs=GatherData[data];
-	classes=ClassesFromGathered[subs];
-	pcs=MapGathered[d\[Function]Length[d]/n,subs];
-	ms=MapGathered[Mean,subs];
-	ss=MapGathered[Covariance,subs];
-	ssi=MapGathered[PseudoInverse,ss];
-	dss=MapGathered[Det,ss];
-	wms=(c\[Function]c->-(1/2)(c/.ssi))/@classes;
-	wvs=(c\[Function]c->(c/.ssi).(c/.ms))/@classes;
-	wss=(c\[Function]c->-(1/2)((c/.ms).(c/.ssi).(c/.ms))-(1/2)Log[c/.dss]+Log[c/.pcs])/@classes;
-	fns=(c\[Function]x\[Function]sample[c,x.(c/.wms).x+(c/.wvs).x+(c/.wss)])/@classes;
-	x\[Function]FindBest[(f\[Function]f[x])/@fns]]
+	gathered=GatherData[data];
+	classes=ClassesFromGathered[gathered];
+	classdata=FullMatrix/@gathered;
+	pcs=N[(d\[Function]Length[d]/n)/@classdata];
+	ms=Mean/@classdata;
+	ss=Covariance/@classdata;
+	ssi=PseudoInverse/@ss;
+	dss=Det/@ss;
+	wms=(si\[Function]-.5*si)/@ssi;
+	wvs=MapThread[Dot,{ssi,ms}];
+	wss=MapThread[{si,d,m,p}\[Function]-.5*m.si.m-.5*Log[d]+Log[p],{ssi,dss,ms,pcs}];
+	fns=MapThread[{wm,wv,ws}\[Function]x\[Function]x.wm.x+wv.x+ws,{wms,wvs,wss}];
+	x\[Function]Ordering[Through[fns[x]],-1][[1]]]
 
 
 MultiVariateNormalClassifierSingleCovariance[data_]:=
