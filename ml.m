@@ -50,7 +50,7 @@ GatherData[data_]:=
 
 
 ClassesFromGathered[gdata_]:=
-	GetClass/@First/@gdata
+	Range[Length[gdata]];
 
 
 (* For clearing empty rows *)
@@ -149,16 +149,16 @@ MultiVariateNormalClassifierSingleCovariance[data_]:=
 (* A Decision Tree Package *)
 
 
-RunningEntropy[countsa_]:=
+RunningEntropy[countswithzeros_]:=
 	Module[{counts,total},
-	counts=Select[Map[x\[Function]x[[2]],ArrayRules[countsa]],Positive];
-	total=Apply[Plus,counts];
-	Apply[Plus,Map[x\[Function]N[-(x/total)*Log2[x/total]],counts]]]
+	counts=Select[countswithzeros,Positive];
+	total=Plus@@counts;
+	Plus@@(x\[Function]N[-(x/total)*Log2[x/total]])/@counts]
 
 
 BestOfDimension[data_,dim_]:=
 	Module[{bestval,bestless,bestmore,bestimpurity,
-			less,more,gathered,classes,countsr,countsl,num,
+			less,more,countsr,countsl,num,
 			shifter,impurity},
 	bestval=Null;
 	bestless=Null;
@@ -166,10 +166,8 @@ BestOfDimension[data_,dim_]:=
 	bestimpurity=\[Infinity];
 	less={};
 	more=Sort[data,(OrderedQ[{GetVec[#1][[dim]],GetVec[#2][[dim]]}])&];
-	gathered=MapGathered[Length,GatherData[more]];
-	classes=ClassesFromGathered[gathered];
-	countsr=SparseArray[gathered];
-	countsl=SparseArray[(c\[Function]c->0)/@classes];
+	countsr=TallyClasses[more];
+	countsl=Table[0,{Length[countsr]}];
 	num=Length[more];
 	While[Length[more]>1,
 		shifter=First[more];
