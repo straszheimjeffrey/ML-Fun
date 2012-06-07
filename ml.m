@@ -13,7 +13,15 @@ GetVec[sample[class_,vec_]]:=vec
 
 
 MapVecs[f_,data_]:=
-	sample[GetClass[#],f[GetVec[#]]]&/@data
+	(s\[Function]sample[GetClass[s],f[GetVec[s]]])/@data
+
+
+ParallelMapVec[f_,data_]:=
+	ParallelMap[s\[Function]sample[GetClass[s],f[GetVec[s]]],data]
+
+
+MapClasses[f_,data_]:=
+	(s\[Function]sample[f[GetClass[s]],GetVec[s]])/@data
 
 
 AllClasses[data_]:=
@@ -21,7 +29,12 @@ AllClasses[data_]:=
 
 
 SelectClass[data_,class_]:=
-	Select[data,(GetClass[#]==class)&]
+	Select[data,s\[Function]GetClass[c]==class]
+
+
+TallyClasses[data_]:=
+	With[{cs=(i\[Function]GetClass[i[[1]]]->i[[2]])/@Tally[data,{x,y}\[Function]First[x]==First[y]]},
+		Range[Max[First/@cs]]/.Append[cs,_Integer->{}]]
 
 
 ClassMatrix[data_,class_]:=
@@ -32,15 +45,12 @@ FullMatrix[data_]:=GetVec/@data
 
 
 GatherData[data_]:=
-	(c\[Function]c-> ClassMatrix[data,c])/@AllClasses[data]
+	With[{r=(s\[Function]GetClass[First[s]]->s)/@GatherBy[data,GetClass]},
+	Range[Max[First/@r]]/.Append[r,_Integer->{}]]
 
 
-ClassesFromGathered[subs_]:=
-	(r\[Function]r[[1]])/@subs
-
-
-MapGathered[f_,subs_]:=
-(c\[Function]c->f[c/.subs])/@ClassesFromGathered[subs]
+ClassesFromGathered[gdata_]:=
+	GetClass/@First/@gdata
 
 
 (* For clearing empty rows *)
@@ -64,41 +74,40 @@ RemoveZeros[data_]:=
 MakePCA[data_,n_]:=
 	Module[{vals,vecs},
 	{vals,vecs}=Eigensystem[data//FullMatrix//Covariance,n];
-	{MapVecs[x\[Function]vecs.x,data],
-	 vecs,
-	 vals}]
+	{vecs,vals}]
 
 
 (* An LDA Package *)
 
 
 OuterDifference[l_,r_]:=
-	Module[{dif},
-	dif=l-r;
+	With[{dif=l-r},
 	Outer[Times,dif,dif]]
 
 
-MakeLDAMatrix[data_]:=
-	Module[{subs,means,classes,withinclass,full,fullmean,betweenclass},
-	subs=GatherData[data];
-	means=MapGathered[Mean,subs];
-	classes=ClassesFromGathered[subs];
-	withinclass=
-		Apply[Plus,
-			(class\[Function]Apply[Plus,(s\[Function]OuterDifference[s,(class/.means)])/@(class/.subs)])
-			/@classes];
+Scatter[classdata_,classmean_]:=
+	Plus@@((x\[Function]OuterDifference[x,classmean])/@classdata)
+
+
+MakeLDAMatrix[data_,n_]:=
+	Module[{classdata,classcounts,classmeans,withinclass,full,fullmean,betweenclass},
+	classdata=FullMatrix/@GatherData[data];
+	classcounts=Length/@classdata;
+	classmeans=Mean/@classdata;
+	Print["Within"];
+	withinclass=Plus@@MapThread[Scatter,{classdata,classmeans}];
 	full=FullMatrix[data];
 	fullmean=Mean[full];
-	betweenclass=
-		Apply[Plus,(c\[Function]Length[c/.subs]*OuterDifference[c/.means,fullmean])/@classes];
-	Eigensystem[PseudoInverse[withinclass].betweenclass,Length[classes]-1]]
+	Print["Between"];
+	betweenclass=Plus@@MapThread[{cm,cc}\[Function]cc*OuterDifference[cm,fullmean],
+					{classmeans,classcounts}];
+	Eigensystem[PseudoInverse[withinclass].betweenclass,n]]
 
 
-MakeLDA[data_]:=
+MakeLDA[data_,n_]:=
 	Module[{vals,matrix},
-	{vals,matrix}=MakeLDAMatrix[data];
-	{MapVecs[x\[Function]matrix.x,data],
-	 matrix,
+	{vals,matrix}=MakeLDAMatrix[data,n];
+	{matrix,
 	 vals}]
 
 
@@ -216,6 +225,9 @@ TreeClassify[branch[dim_,val_,leqtree_,gtree_],x_]:=
 
 
 TreeClassify[leaf[class_],_]:=class
+
+
+DistributeDefinitions["ML`"]
 
 
 EndPackage[];
