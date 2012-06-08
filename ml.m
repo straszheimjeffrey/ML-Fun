@@ -182,17 +182,22 @@ BestOfDimension[data_,dim_]:=
 	best]
 
 
+splitFactor=50;
 BestSplit[data_]:=
-	Fold[{next,best}\[Function]If[next[[6]]<best[[6]],next,best],
-		{Null,Null,\[Infinity],Null,\[Infinity],\[Infinity]},
-		ParallelMap[d\[Function]BestOfDimension[data,d],
-					Range[First[data]//GetVec//Length]]]
+	With[{n=Length[data],dims=First[data]//GetVec//Length},
+		With[{map=If[n*dims<splitFactor,Map,ParallelMap]},
+			Fold[{next,best}\[Function]If[next[[6]]<best[[6]],next,best],
+				{Null,Null,\[Infinity],Null,\[Infinity],\[Infinity]},
+				map[d\[Function]BestOfDimension[data,d],Range[dims]]]]]
 
 
 LeafOrBranch[data_,entropy_,maxentropy_]:=
-	If[entropy<=maxentropy,
-		leaf[Ordering[TallyClasses[data],-1][[1]]],
-		MakeTree[data,maxentropy]]
+	With[{n=Length[data],dims=First[data]//GetVec//Length},
+		If[entropy<=maxentropy,
+			leaf[Ordering[TallyClasses[data],-1][[1]]],
+			If[n*dims<splitfactor,
+				MakeTree[data,maxentropy],
+				ParallelEvaluate[{data,maxentropy},MakeTree[data,maxentropy]]]]]
 
 MakeTree[data_,maxentropy_]:=
 	Module[{dim,less,lentropy,more,mentropy,impurity,
