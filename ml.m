@@ -34,7 +34,7 @@ SelectClass[data_,class_]:=
 
 TallyClasses[data_]:=
 	With[{cs=(i\[Function]GetClass[i[[1]]]->i[[2]])/@Tally[data,{x,y}\[Function]First[x]==First[y]]},
-		Range[Max[First/@cs]]/.Append[cs,_Integer->{}]]
+		Range[Max[First/@cs]]/.Append[cs,_Integer->0]]
 
 
 ClassMatrix[data_,class_]:=
@@ -192,13 +192,9 @@ BestSplit[data_]:=
 
 
 LeafOrBranch[data_,entropy_,maxentropy_]:=
-	With[{n=Length[data],dims=First[data]//GetVec//Length},
-		If[entropy<=maxentropy,
-			leaf[Ordering[TallyClasses[data],-1][[1]]],
-			If[n*dims<splitfactor,
-				MakeTree[data,maxentropy],
-				ParallelEvaluate[{data,maxentropy},MakeTree[data,maxentropy]]]]]
-
+	If[entropy<=maxentropy,
+		leaf[Ordering[TallyClasses[data],-1][[1]]],
+		MakeTree[data,maxentropy]]
 MakeTree[data_,maxentropy_]:=
 	Module[{dim,less,lentropy,more,mentropy,impurity,
 			lbranch,rbranch,val},
@@ -210,7 +206,7 @@ MakeTree[data_,maxentropy_]:=
 		lbranch=LeafOrBranch[less,lentropy,maxentropy];
 		rbranch=LeafOrBranch[more,mentropy,maxentropy];
 		val=(GetVec[less[[-1]]][[dim]] + GetVec[more[[1]]][[dim]]) / 2.0;
-		branch[dim,val,lbranch,rbranch]]]
+		WaitAll[branch[dim,val,lbranch,rbranch]]]]
 
 
 DistributeDefinitions[MakeTree];
